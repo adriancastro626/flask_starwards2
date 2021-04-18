@@ -30,6 +30,12 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+@app.route('/token', methods=['POST'])
+def create_token():
+    
+
+    return jsonify(all_users), 200
+
 
 # START CRUD USER
 
