@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Planet, People, Vehicle
 #from models import Person
 
 app = Flask(__name__)
@@ -30,8 +30,11 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
+
+# START CRUD USER
+
 @app.route('/user', methods=['GET'])
-def handle_hello():
+def handle_user():
 
     users = User.query.all()
     all_users = list(map(lambda x: x.serialize(), users))
@@ -81,9 +84,164 @@ def delete_user(user_id):
     db.session.delete(deleteUser)
     db.session.commit()
 
-    return jsonify("borrado"), 200
+    return jsonify("Eliminado"), 200
+
+# START CRUD PLANET
+
+@app.route('/planet', methods=['GET'])  #Mostrar info
+def handle_planet():
+
+    planets = Planet.query.all()
+    all_planets = list(map(lambda x: x.serialize(), planets))
+
+    return jsonify(all_planets), 200
+
+@app.route('/planet', methods=['POST']) #Crear nuevo 
+def create_planet():
+
+    request_body_planet = request.get_json()
+
+    newPlanet = Planet(planet_name=request_body_planet["planet_name"], population=request_body_planet["population"], terrain=request_body_planet["terrain"])
+    db.session.add(newPlanet)
+    db.session.commit()
+
+    return jsonify(request_body_planet), 200
+
+@app.route('/planet/<int:planet_id>', methods=['PUT']) #Actualizar 
+def edit_planet(planet_id):
+
+    request_body_planet = request.get_json()
+
+    updatePlanet = Planet.query.get(planet_id)
+    if updatePlanet is None:
+        raise APIException('User not found', status_code=404)
+
+    if "planet_name" in request_body_planet:
+        updatePlanet.planet_name = request_body_planet["planet_name"]
+    if "population" in request_body_planet:
+        updatePlanet.population = request_body_planet["population"]
+    if "terrain" in request_body_planet:
+        updatePlanet.terrain = request_body_planet["terrain"]    
+    db.session.commit()
+
+    return jsonify(request_body_planet), 200
+
+@app.route('/planet/<int:planet_id>', methods=['DELETE']) #Borrar 
+def delete_planet(planet_id):
+        
+    deletePlanet = Planet.query.get(planet_id)
+    if deletePlanet is None:
+        raise APIException('User not found', status_code=404)
+    db.session.delete(deletePlanet)
+    db.session.commit()
+
+    return jsonify("Eliminado"), 200
+
+# START CRUD PEOPLE
+
+@app.route('/people', methods=['GET'])  #Mostrar info
+def handle_people():
+
+    peoples = People.query.all()
+    all_peoples = list(map(lambda x: x.serialize(), peoples))
+
+    return jsonify(all_peoples), 200
+
+@app.route('/people', methods=['POST']) #Crear nuevo 
+def create_people():
+
+    request_body_people = request.get_json()
+
+    newPeople = People(name=request_body_people["name"], last_name=request_body_people["last_name"], power=request_body_people["power"])
+    db.session.add(newPeople)
+    db.session.commit()
+
+    return jsonify(request_body_people), 200
+
+@app.route('/people/<int:people_id>', methods=['PUT']) #Actualizar 
+def edit_people(people_id):
+
+    request_body_people = request.get_json()
+
+    updatePeople = People.query.get(people_id)
+    if updatePeople is None:
+        raise APIException('User not found', status_code=404)
+
+    if "name" in request_body_people:
+        updatePeople.name = request_body_people["name"]
+    if "last_name" in request_body_people:
+        updatePeople.last_name = request_body_people["last_name"]
+    if "power" in request_body_people:
+        updatePeople.power = request_body_people["power"]    
+    db.session.commit()
+
+    return jsonify(request_body_people), 200
+
+@app.route('/people/<int:people_id>', methods=['DELETE']) #Borrar 
+def delete_people(people_id):
+        
+    deletePeople = People.query.get(people_id)
+    if deletePeople is None:
+        raise APIException('User not found', status_code=404)
+    db.session.delete(deletePeople)
+    db.session.commit()
+
+    return jsonify("Eliminado"), 200
+
+
+# START CRUD VEHICLE
+
+@app.route('/vehicle', methods=['GET'])  #Mostrar info
+def handle_vehicle():
+
+    vehicles = Vehicle.query.all()
+    all_vehicles = list(map(lambda x: x.serialize(), vehicles))
+
+    return jsonify(all_vehicles), 200
+
+@app.route('/vehicle', methods=['POST']) #Crear nuevo 
+def create_vehicle():
+
+    request_body_vehicle = request.get_json()
+
+    newVehicle = Vehicle(brand=request_body_vehicle["brand"], capacity=request_body_vehicle["capacity"], color=request_body_vehicle["color"])
+    db.session.add(newVehicle)
+    db.session.commit()
+
+    return jsonify(request_body_vehicle), 200
+
+@app.route('/vehicle/<int:vehicle_id>', methods=['PUT']) #Actualizar 
+def edit_vehicle(vehicle_id):
+
+    request_body_vehicle = request.get_json()
+
+    updateVehicle = Vehicle.query.get(vehicle_id)
+    if updateVehicle is None:
+        raise APIException('User not found', status_code=404)
+
+    if "name" in request_body_vehicle:
+        updateVehicle.name = request_body_vehicle["name"]
+    if "last_name" in request_body_vehicle:
+        updateVehicle.last_name = request_body_vehicle["last_name"]
+    if "power" in request_body_vehicle:
+        updateVehicle.power = request_body_vehicle["power"]    
+    db.session.commit()
+
+    return jsonify(request_body_vehicle), 200
+
+@app.route('/vehicle/<int:vehicle_id>', methods=['DELETE']) #Borrar 
+def delete_vehicle(vehicle_id):
+        
+    deleteVehicle = Vehicle.query.get(vehicle)
+    if deleteVehicle is None:
+        raise APIException('User not found', status_code=404)
+    db.session.delete(deleteVehicles)
+    db.session.commit()
+
+    return jsonify("Eliminado"), 200
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=False)
+

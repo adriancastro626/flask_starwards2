@@ -43,7 +43,8 @@ class Planet(db.Model):
         return {
             "id": self.id,
             "planet_name": self.planet_name,
-            # do not serialize the password, its a security breach
+            "population": self.population,
+            "terrain": self.terrain            
         }
 
 class People(db.Model):
@@ -63,7 +64,8 @@ class People(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            # do not serialize the password, its a security breach
+            "last_name": self.last_name,
+            "power": self.power            
         }
 
 class Vehicle(db.Model):
@@ -83,5 +85,6 @@ class Vehicle(db.Model):
         return {
             "id": self.id,
             "brand": self.brand,
-            # do not serialize the password, its a security breach
+            "capacity": self.capacity,
+            "color": self.color            
         }
