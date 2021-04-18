@@ -9,16 +9,41 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User, Planet, People, Vehicle
+import json
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
+
 #from models import Person
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_CONNECTION_STRING')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+
+# Setup the Flask-JWT-Extended extension
+app.config["JWT_SECRET_KEY"] = os.environ.get('JWT_SECRET') # Change this!
+jwt = JWTManager(app)
+
+# TOKEN
+
+# Create a route to authenticate your users and return JWTs. The
+# create_access_token() function is used to actually generate the JWT.
+@app.route("/token", methods=["POST"])
+def create_token():    
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+    if email != "test" or password != "test":
+        return jsonify({"msg": "Bad username or password"}), 401
+
+    access_token = create_access_token(identity=email)
+    return jsonify(access_token=access_token)
 
 # Handle/serialize errors like a JSON object
 @app.errorhandler(APIException)
@@ -30,13 +55,6 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/token', methods=['POST'])
-def create_token():
-    
-
-    return jsonify(all_users), 200
-
-
 # START CRUD USER
 
 @app.route('/user', methods=['GET'])
@@ -46,6 +64,11 @@ def handle_user():
     all_users = list(map(lambda x: x.serialize(), users))
 
     return jsonify(all_users), 200
+
+@app.route('/user/<int:id>', methods=['GET'])
+def getSingleUser(id):
+    user = User.query.get(id)
+    return jsonify(user.serialize()), 200
 
 @app.route('/user', methods=['POST'])
 def create_user():
@@ -102,6 +125,11 @@ def handle_planet():
 
     return jsonify(all_planets), 200
 
+@app.route('/planet/<int:id>', methods=['GET'])
+def getSinglePlanet(id):
+    planet = Planet.query.get(id)
+    return jsonify(planet.serialize()), 200
+
 @app.route('/planet', methods=['POST']) #Crear nuevo 
 def create_planet():
 
@@ -152,6 +180,11 @@ def handle_people():
     all_peoples = list(map(lambda x: x.serialize(), peoples))
 
     return jsonify(all_peoples), 200
+
+@app.route('/people/<int:id>', methods=['GET'])
+def getSinglePeople(id):
+    people = People.query.get(id)
+    return jsonify(people.serialize()), 200
 
 @app.route('/people', methods=['POST']) #Crear nuevo 
 def create_people():
@@ -204,6 +237,11 @@ def handle_vehicle():
     all_vehicles = list(map(lambda x: x.serialize(), vehicles))
 
     return jsonify(all_vehicles), 200
+
+@app.route('/vehicle/<int:id>', methods=['GET'])
+def getSingleVehicle(id):
+    vehicle = Vehicle.query.get(id)
+    return jsonify(vehicle.serialize()), 200
 
 @app.route('/vehicle', methods=['POST']) #Crear nuevo 
 def create_vehicle():
